@@ -6,11 +6,6 @@ from binance.um_futures import UMFutures
 from binance.error import ClientError
 from dotenv import load_dotenv
 
-# Set global variables
-'''
-api_key = 'GEcw0dAon6Rg52SQkGc1jwtHQdA8rjpUw0ZoTQ8hvTHbCABfz6gnfCmrEjpA1rV3'
-api_secret = 'rAGySyby1PYddQNaQqxGQozFK0dx2Y5xSa3ITN7cUF2qxQBR4o62fr1sQm8dWJK7'
-'''
 
 # Load environment variables from .env file
 load_dotenv()
@@ -28,7 +23,6 @@ TSL = 0.01
 volume = 5  # USDT
 leverage = 5
 type = 'ISOLATED'
-
 symbol = 'BTCUSDT'
 
 
@@ -206,12 +200,7 @@ if __name__ == "__main__":
 
         # Wait for 60 seconds before fetching data again
         time.sleep(60)
-
 '''
-
-
-
-
 import traceback
 
 try:
