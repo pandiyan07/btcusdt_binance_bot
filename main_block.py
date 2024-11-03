@@ -5,6 +5,26 @@ import os
 from binance.um_futures import UMFutures
 from binance.error import ClientError
 from dotenv import load_dotenv
+import requests
+
+
+def get_public_ip():
+    try:
+        response = requests.get('https://api.ipify.org?format=json')
+        response.raise_for_status()  # Check if request was successful
+        ip = response.json().get('ip')
+        return ip
+    except requests.RequestException as e:
+        print(f"Error fetching IP address: {e}")
+        return None
+
+# Usage
+my_ip = get_public_ip()
+if my_ip:
+    print("Your public IP address is:", my_ip)
+else:
+    print("Could not retrieve IP address.")
+
 
 
 # Load environment variables from .env file
@@ -24,28 +44,6 @@ volume = 5  # USDT
 leverage = 5
 type = 'ISOLATED'
 symbol = 'BTCUSDT'
-
-
-'''
-import requests
-
-def get_public_ip():
-    try:
-        response = requests.get('https://api.ipify.org?format=json')
-        response.raise_for_status()  # Check if request was successful
-        ip = response.json().get('ip')
-        return ip
-    except requests.RequestException as e:
-        print(f"Error fetching IP address: {e}")
-        return None
-
-# Usage
-my_ip = get_public_ip()
-if my_ip:
-    print("Your public IP address is:", my_ip)
-else:
-    print("Could not retrieve IP address.")
-'''
 
 
 # 1. GET_ACCOUNT_BALANCE function
