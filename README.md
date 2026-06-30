@@ -40,7 +40,7 @@ The application is designed with modular functions, making it easy to understand
 
 ```
 .
-├── main_block.py        # Main trading bot
+├── main.py        # Main trading bot
 ├── .env                 # Binance API credentials
 ├── requirements.txt
 └── README.md
@@ -280,7 +280,7 @@ pip install -r requirements.txt
 Run the bot:
 
 ```bash
-python main_block.py
+python main.py
 ```
 
 ---
