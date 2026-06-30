@@ -1,31 +1,19 @@
 import pandas as pd
 import pandas_ta as ta
 import time
+from pytz import utc
 import os
 from binance.um_futures import UMFutures
 from binance.error import ClientError
 from dotenv import load_dotenv
+from flask import Flask, render_template
+from apscheduler.schedulers.background import BackgroundScheduler
 import requests
 
+# pip install python-dotenv
 
-def get_public_ip():
-    try:
-        response = requests.get('https://api.ipify.org?format=json')
-        response.raise_for_status()  # Check if request was successful
-        ip = response.json().get('ip')
-        return ip
-    except requests.RequestException as e:
-        print(f"Error fetching IP address: {e}")
-        return None
-
-# Usage
-my_ip = get_public_ip()
-if my_ip:
-    print("Your public IP address is:", my_ip)
-else:
-    print("Could not retrieve IP address.")
-
-
+binance_btcusdt_futures_app = Flask(__name__)
+a = 0
 
 # Load environment variables from .env file
 load_dotenv()
@@ -44,6 +32,9 @@ volume = 5  # USDT
 leverage = 5
 type = 'ISOLATED'
 symbol = 'BTCUSDT'
+
+
+
 
 
 # 1. GET_ACCOUNT_BALANCE function
@@ -140,7 +131,7 @@ def OPEN_ORDER(side, qty):
 # 9. CHECK_POSITIONS function
 def CHECK_POSITIONS():
     try:
-        positions = client.position_information(symbol=symbol)
+        positions = client.get_position_risk(symbol=symbol)
         for position in positions:
             if float(position['positionAmt']) != 0:
                 print(f"Open position: {position}")
@@ -173,45 +164,81 @@ def TRADING_ALGO(df):
     else:
         print("No trading condition met")
 
-# Main loop
-if __name__ == "__main__":
-    # Set leverage and margin type
-    SET_LEVERAGE()
-    SET_MARGIN_TYPE()
-    
+
+
+
+
+
+
+
+
+def SCHEDULED_TASK():
     # Check for any open positions and close them if any
     position = CHECK_POSITIONS()
     if position:
         CLOSE_OPEN_ORDER()
     
-    while True:
-        # Fetch new data
-        df = DATA_FETCHER()
-        print (df)
-        
-        if df is not None:
-            # Get account balance
-            GET_ACCOUNT_BALANCE()
-
-            # Execute trading logic
-            #################################TRADING_ALGO(df)
-
-        # Wait for 60 seconds before fetching data again
-        time.sleep(60)
-'''
-import traceback
-
-try:
-    result = 10 / 0
-except Exception as e:
-    tb = traceback.extract_tb(e.__traceback__)
-    line_number = tb[-1].lineno
+    #while True:
+    # Fetch new data
+    df = DATA_FETCHER()
+    print (df[:5])
     
-    with open("error_log.txt", "w") as f:
-        f.write(f"Error occurred on line: {line_number}")
-        f.write('\n')
-        f.write(f"An error occurred: {e}")
-        f.write('\n\n')
-        traceback.print_exc(file=f)
+    if df is not None:
+        # Get account balance
+        GET_ACCOUNT_BALANCE()
 
-'''
+        # Execute trading logic
+        #################################TRADING_ALGO(df)
+
+    # Wait for 60 seconds before fetching data again
+    #time.sleep(60)
+
+
+scheduler = BackgroundScheduler(timezone=utc)
+scheduler.add_job(SCHEDULED_TASK, 'interval', minutes=1)
+
+@binance_btcusdt_futures_app.route('/')
+def HOME_PAGE():
+    # Set leverage and margin type
+    #################################SET_LEVERAGE()
+    #################################SET_MARGIN_TYPE()
+    global a
+    
+    if a==0:
+        SCHEDULED_TASK()
+        scheduler.start()
+    a+=1
+    
+    '''
+    54.254.162.138
+    54.254.162.138
+    '''
+    
+    
+    def get_public_ip():
+        try:
+            response = requests.get('https://api.ipify.org?format=json')
+            response.raise_for_status()  # Check if request was successful
+            ip = response.json().get('ip')
+            return ip
+        except requests.RequestException as e:
+            print(f"Error fetching IP address: {e}")
+            return None
+    
+    # Usage
+    my_ip = get_public_ip()
+    if my_ip:
+        print("YOUR PUBLIC IP ADDRESS IS :", my_ip)
+    else:
+        print("Could not retrieve IP address.")
+    
+    return render_template('homepage.html', message='<h1>balance fetched</h1>')
+    
+# Main loop
+if __name__ == "__main__":
+    
+    try:
+        binance_btcusdt_futures_app.run(host='0.0.0.0', port=5000)
+    except (KeyboardInterrupt, SystemExit):
+        print ('SOME ERROR HAS OCCURED IN THE ================= binance_btcusdt_futures_app')
+        scheduler.shutdown()
